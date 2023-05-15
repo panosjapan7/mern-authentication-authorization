@@ -29,4 +29,28 @@ const signup = async (req, res, next) => {
   return res.status(201).json({ message: user });
 };
 
-exports.signup = signup;
+const login = async (req, res, next) => {
+  const { email, password } = req.body;
+
+  let existingUser;
+
+  try {
+    console.log("email: ", email);
+    existingUser = await User.findOne({ email: email });
+    console.log("existingUser: ", existingUser);
+  } catch (error) {
+    return new Error("error: ", err);
+  }
+
+  if (!existingUser)
+    return res.status(400).json({ message: "User not found. Signup please" });
+
+  const isPasswordCorrect = brcypt.compareSync(password, existingUser.password);
+  console.log("isPasswordCorrect: ", isPasswordCorrect);
+  if (!isPasswordCorrect)
+    return res.status(400).json({ message: "Invalid email or password" });
+  if (isPasswordCorrect)
+    return res.status(200).json({ message: "Successfully logged in." });
+};
+
+module.exports = { login, signup };
