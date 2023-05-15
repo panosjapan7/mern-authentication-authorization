@@ -1,5 +1,8 @@
 const brcypt = require("bcryptjs");
+const jwt = require("jsonwebtoken");
 const User = require("../model/User");
+
+const JWT_SECRET_KEY = "MyKey";
 
 const signup = async (req, res, next) => {
   const { name, email, password } = req.body;
@@ -49,8 +52,41 @@ const login = async (req, res, next) => {
   console.log("isPasswordCorrect: ", isPasswordCorrect);
   if (!isPasswordCorrect)
     return res.status(400).json({ message: "Invalid email or password" });
-  if (isPasswordCorrect)
-    return res.status(200).json({ message: "Successfully logged in." });
+  const token = jwt.sign({ id: existingUser._id }, JWT_SECRET_KEY, {
+    expiresIn: "1hr",
+  });
+
+  return res
+    .status(200)
+    .json({ message: "Successfully logged in.", user: existingUser, token });
 };
 
-module.exports = { login, signup };
+const verifyToken = (req, res, next) => {
+  const headers = req.header(`Authorization`);
+  const token = headers.split(" ")[1];
+  console.log("headers: ", headers);
+  console.log("token: ", token);
+  if (!token) return res.status(404).json({ message: "Token not found" });
+  jwt.verify(String(token), JWT_SECRET_KEY, (error, user) => {
+    if (error) return res.status(400).json({ message: "Invalid token" });
+    console.log("user._id: ", user.id);
+    req.id = user.id;
+  });
+  next();
+};
+
+const getUser = async (req, res, next) => {
+  const userId = req.id;
+  let user;
+  try {
+    user = await User.findById(userId, "-password"); // Send all the details of this User entry except the "password" field
+  } catch (error) {
+    return new Error(error);
+  }
+
+  if (!user) return res.status(404).json({ message: "User not found" });
+
+  return res.status(200).json({ user });
+};
+
+module.exports = { getUser, login, signup, verifyToken };
