@@ -38,9 +38,7 @@ const login = async (req, res, next) => {
   let existingUser;
 
   try {
-    console.log("email: ", email);
     existingUser = await User.findOne({ email: email });
-    console.log("existingUser: ", existingUser);
   } catch (error) {
     return new Error("error: ", err);
   }
@@ -49,7 +47,6 @@ const login = async (req, res, next) => {
     return res.status(400).json({ message: "User not found. Signup please" });
 
   const isPasswordCorrect = brcypt.compareSync(password, existingUser.password);
-  console.log("isPasswordCorrect: ", isPasswordCorrect);
   if (!isPasswordCorrect)
     return res.status(400).json({ message: "Invalid email or password" });
   const token = jwt.sign({ id: existingUser._id }, JWT_SECRET_KEY, {
@@ -64,12 +61,9 @@ const login = async (req, res, next) => {
 const verifyToken = (req, res, next) => {
   const headers = req.header(`Authorization`);
   const token = headers.split(" ")[1];
-  console.log("headers: ", headers);
-  console.log("token: ", token);
   if (!token) return res.status(404).json({ message: "Token not found" });
   jwt.verify(String(token), JWT_SECRET_KEY, (error, user) => {
     if (error) return res.status(400).json({ message: "Invalid token" });
-    console.log("user._id: ", user.id);
     req.id = user.id;
   });
   next();
