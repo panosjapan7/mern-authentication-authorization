@@ -49,9 +49,17 @@ const login = async (req, res, next) => {
   const isPasswordCorrect = brcypt.compareSync(password, existingUser.password);
   if (!isPasswordCorrect)
     return res.status(400).json({ message: "Invalid email or password" });
+
   const token = jwt.sign({ id: existingUser._id }, JWT_SECRET_KEY, {
-    expiresIn: "1hr",
+    expiresIn: "30s",
   });
+
+  res.cookie(String(existingUser._id), token, {
+    path: "/",
+    expires: new Date(Date.now() + 1000 * 30),
+    httpOnly: true,
+    sameSite: "lax",
+  }); // "existingUser._id" will be the name of the cookie and "token" will be its value
 
   return res
     .status(200)
@@ -59,9 +67,11 @@ const login = async (req, res, next) => {
 };
 
 const verifyToken = (req, res, next) => {
-  const headers = req.header(`Authorization`);
-  const token = headers.split(" ")[1];
+  const cookies = req.headers.cookie;
+  const token = cookies.split("=")[1];
+
   if (!token) return res.status(404).json({ message: "Token not found" });
+
   jwt.verify(String(token), JWT_SECRET_KEY, (error, user) => {
     if (error) return res.status(400).json({ message: "Invalid token" });
     req.id = user.id;
