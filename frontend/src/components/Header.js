@@ -1,11 +1,12 @@
 import React, { useState } from "react";
 import { AppBar, Box, Tab, Tabs, Toolbar, Typography } from "@mui/material";
+import { Link } from "react-router-dom";
 
 const Header = () => {
   const [value, setValue] = useState();
   return (
     <div>
-      <AppBar>
+      <AppBar position="sticky">
         <Toolbar>
           <Typography variant="h3">MernAuth</Typography>
           <Box sx={{ marginLeft: "auto" }}>
@@ -15,8 +16,8 @@ const Header = () => {
               value={value}
               textColor="inherit"
             >
-              <Tab label="Login" />
-              <Tab label="Signup" />
+              <Tab to="/login" LinkComponent={Link} label="Login" />
+              <Tab to="/signup" LinkComponent={Link} label="Signup" />
             </Tabs>
           </Box>
         </Toolbar>
