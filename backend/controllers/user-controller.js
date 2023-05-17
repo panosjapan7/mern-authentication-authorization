@@ -2,8 +2,6 @@ const brcypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const User = require("../model/User");
 
-const JWT_SECRET_KEY = "MyKey";
-
 const signup = async (req, res, next) => {
   const { name, email, password } = req.body;
   let existingUser;
@@ -50,7 +48,7 @@ const login = async (req, res, next) => {
   if (!isPasswordCorrect)
     return res.status(400).json({ message: "Invalid email or password" });
 
-  const token = jwt.sign({ id: existingUser._id }, JWT_SECRET_KEY, {
+  const token = jwt.sign({ id: existingUser._id }, process.env.JWT_SECRET_KEY, {
     expiresIn: "35s",
   });
 
@@ -78,7 +76,7 @@ const verifyToken = (req, res, next) => {
 
   if (!token) return res.status(404).json({ message: "Token not found" });
 
-  jwt.verify(String(token), JWT_SECRET_KEY, (error, user) => {
+  jwt.verify(String(token), process.env.JWT_SECRET_KEY, (error, user) => {
     if (error) return res.status(400).json({ message: "Invalid token" });
     req.id = user.id;
   });
@@ -105,7 +103,7 @@ const refreshToken = (req, res, next) => {
   if (!prevToken)
     return res.status(400).json({ message: "Couldn't find token" });
 
-  jwt.verify(String(prevToken), JWT_SECRET_KEY, (err, user) => {
+  jwt.verify(String(prevToken), process.env.JWT_SECRET_KEY, (err, user) => {
     if (err) {
       console.log(err);
       return res.status(403).json({ message: "Authentication failed" });
@@ -114,7 +112,7 @@ const refreshToken = (req, res, next) => {
     res.clearCookie(`${user.id}`);
     req.cookies[`${user.id}`] = "";
 
-    const token = jwt.sign({ id: user.id }, JWT_SECRET_KEY, {
+    const token = jwt.sign({ id: user.id }, process.env.JWT_SECRET_KEY, {
       expiresIn: "35s",
     });
 
