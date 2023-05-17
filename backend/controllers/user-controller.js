@@ -93,4 +93,7 @@ const getUser = async (req, res, next) => {
   return res.status(200).json({ user });
 };
 
-module.exports = { getUser, login, signup, verifyToken };
+exports.signup = signup;
+exports.login = login;
+exports.verifyToken = verifyToken;
+exports.getUser = getUser;
