@@ -63,6 +63,7 @@ const login = async (req, res, next) => {
     expires: new Date(Date.now() + 1000 * 30),
     httpOnly: true,
     sameSite: "lax",
+    secure: process.env.NODE_ENV,
   }); // "existingUser._id" will be the name of the cookie and "token" will be its value
 
   return res
@@ -123,6 +124,7 @@ const refreshToken = (req, res, next) => {
       expires: new Date(Date.now() + 1000 * 30), // 30 seconds
       httpOnly: true,
       sameSite: "lax",
+      secure: process.env.NODE_ENV,
     }); // "existingUser._id" will be the name of the cookie and "token" will be its value
 
     req.id = user.id;
