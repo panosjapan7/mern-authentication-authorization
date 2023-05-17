@@ -23,7 +23,6 @@ const Welcome = () => {
       const res = await axios.get("http://localhost:5000/api/user", {
         withCredentials: true,
       });
-      console.log("res:", res);
       const data = res.data;
       return data;
     } catch (err) {
