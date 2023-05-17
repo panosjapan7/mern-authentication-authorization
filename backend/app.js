@@ -3,12 +3,21 @@ const mongoose = require("mongoose");
 const router = require("./routes/user-routes");
 const cookieParser = require("cookie-parser");
 const cors = require("cors");
+const rateLimit = require("express-rate-limit");
 require("dotenv").config();
 const app = express();
 
 app.use(cors({ credentials: true, origin: "http://localhost:3000" }));
 app.use(cookieParser());
 app.use(express.json());
+
+// Apply rate limiting middleware
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 100, // Max requests per windowMs
+});
+app.use(limiter);
+
 app.use("/api", router);
 
 mongoose
