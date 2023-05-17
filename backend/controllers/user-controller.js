@@ -130,8 +130,28 @@ const refreshToken = (req, res, next) => {
   });
 };
 
+const logout = (req, res, next) => {
+  const cookies = req.headers.cookie; // Gets cookies from header
+  const prevToken = cookies.split("=")[1];
+  if (!prevToken)
+    return res.status(400).json({ message: "Couldn't find token" });
+
+  jwt.verify(String(prevToken), process.env.JWT_SECRET_KEY, (err, user) => {
+    if (err) {
+      console.log(err);
+      return res.status(403).json({ message: "Authentication failed" });
+    }
+
+    res.clearCookie(`${user.id}`);
+    req.cookies[`${user.id}`] = "";
+
+    return res.status(200).json({ message: "Logged out successfully" });
+  });
+};
+
 exports.signup = signup;
 exports.login = login;
 exports.verifyToken = verifyToken;
 exports.getUser = getUser;
 exports.refreshToken = refreshToken;
+exports.logout = logout;
